@@ -1,1 +1,0 @@
-# CCC-Rock-Paper-Scissors
