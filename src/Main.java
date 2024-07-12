@@ -8,7 +8,7 @@ public class Main {
 
     /**
      * Do not change this method. Method Loads the Config and initializes the IOManager.
-     * @param args
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         Config config = ConfigLoader.loadConfig("config.xml");
@@ -30,9 +30,9 @@ public class Main {
      * example of a program to output line length of each line
      * DO NOT CHANGE PARAMETERS OR RETURN TYPE
      *
-     * @param reader
-     * @param writer
-     * @throws IOException
+     * @param reader Scanner object to read from input file
+     * @param writer FileWriter object to write to output file
+     * @throws IOException if an I/O error occurs
      */
     public static void solve(Scanner reader, FileWriter writer) throws IOException {
         //read lines from input
