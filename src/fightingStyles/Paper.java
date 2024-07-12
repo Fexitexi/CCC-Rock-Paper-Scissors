@@ -1,23 +1,37 @@
 package fightingStyles;
 
-public class Paper implements FightingStyle{
+public class Paper extends FightingStyle{
     @Override
-    public char fights(FightingStyle other) {
-        return other.fightsWithPaper();
+    public FightingStyle fights(FightingStyle other) {
+        if (other.beatsPaper()){
+            return other;
+        } else {
+            return this;
+        }
     }
 
     @Override
-    public char fightsWithRock() {
+    public boolean beatsRock() {
+        return true;
+    }
+
+    @Override
+    public boolean beatsScissors() {
+        return false;
+    }
+
+    @Override
+    public boolean beatsPaper() {
+        return true;
+    }
+
+    @Override
+    public char getChar() {
         return 'P';
     }
 
     @Override
-    public char fightsWithScissors() {
-        return 'S';
-    }
-
-    @Override
-    public char fightsWithPaper() {
-        return 'P';
+    public FightingStyle getsBeatenBy(){
+        return new Scissors();
     }
 }

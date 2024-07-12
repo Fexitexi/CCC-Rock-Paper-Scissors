@@ -1,4 +1,6 @@
 import fightingStyles.FightingStyle;
+import fightingStyles.Scissors;
+import tournament.Tournament;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,7 +45,9 @@ public class Main {
         String result;
         for(int i = 0;i < n;i++) {
             String line = reader.nextLine();
-            result = solveLevel1(line);
+            //result = solveLevel1(line);
+            //result = solveLevel2(line);
+            result = solveLevel3(line);
 
             //write result to file
             writer.write(result + "\n");
@@ -54,17 +58,32 @@ public class Main {
         //parse input into object array
         FightingStyle[] fightingStyles = new FightingStyle[2];
         for (int i = 0; i < line.length(); i++) {
-            char c = line.charAt(i);
-            if (c == 'R') {
-                fightingStyles[i] = new fightingStyles.Rock();
-            } else if (c == 'S') {
-                fightingStyles[i] = new fightingStyles.Scissors();
-            } else if (c == 'P') {
-                fightingStyles[i] = new fightingStyles.Paper();
-            }
+            fightingStyles[i] = FightingStyle.parseCharToFightingStyle(line.charAt(i));
         }
 
         //solving
-        return fightingStyles[0].fights(fightingStyles[1]) + "";
+        return fightingStyles[0].fights(fightingStyles[1]).getChar() + "";
+    }
+
+    public static String solveLevel2(String line){
+        //parse String into Tournament
+        Tournament t = new Tournament(line);
+
+        return t.getRoot().getStandingsAtLevel(t.getLevels() - 2);
+    }
+
+    public static String solveLevel3(String line){
+        //parse String into amounts
+        int rocks = Integer.parseInt(line.substring(0, line.indexOf('R')));
+        System.out.println("rocks: " + rocks);
+        int papers = Integer.parseInt(line.substring(line.indexOf('R') + 2, line.indexOf('P')));
+        System.out.println("papers: " + papers);
+        int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
+        System.out.println("scissors: " + scissors);
+        System.out.println("total: " + (rocks + papers + scissors));
+
+        Tournament t = new Tournament(rocks, papers, scissors, new Scissors());
+
+        return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 }
