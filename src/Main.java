@@ -1,3 +1,5 @@
+import fightingStyles.FightingStyle;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
@@ -38,13 +40,31 @@ public class Main {
         int n = reader.nextInt();
         reader.nextLine(); //skip linebreak
 
-        int result = 0;
+        String result;
         for(int i = 0;i < n;i++) {
             String line = reader.nextLine();
-            result = line.length();
+            result = solveLevel1(line);
 
             //write result to file
             writer.write(result + "\n");
         }
+    }
+
+    public static String solveLevel1(String line) {
+        //parse input into object array
+        FightingStyle[] fightingStyles = new FightingStyle[2];
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == 'R') {
+                fightingStyles[i] = new fightingStyles.Rock();
+            } else if (c == 'S') {
+                fightingStyles[i] = new fightingStyles.Scissors();
+            } else if (c == 'P') {
+                fightingStyles[i] = new fightingStyles.Paper();
+            }
+        }
+
+        //solving
+        return fightingStyles[0].fights(fightingStyles[1]) + "";
     }
 }
