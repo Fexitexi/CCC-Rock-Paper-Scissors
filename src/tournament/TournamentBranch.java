@@ -1,6 +1,7 @@
 package tournament;
 
 import fightingStyles.FightingStyle;
+import fightingStyles.Scissors;
 
 public class TournamentBranch {
     private TournamentBranch upperBranch;
@@ -61,6 +62,39 @@ public class TournamentBranch {
         }
 
         return this.upperBranch.getStandingsAtLevel(level) + this.lowerBranch.getStandingsAtLevel(level);
+    }
+
+    public void checkSolutionLevel4(int rocks, int papers, int scissors, String line){
+        int total = rocks + papers + scissors;
+        if (total != line.length()) {
+            throw new RuntimeException("Incorrect line length");
+        }
+
+        //counting the occurences of the fighting styles
+        int[] counts = new int[3];
+        for (int i = 0; i < line.length(); i++) {
+            switch (line.charAt(i)) {
+                case 'R' -> counts[0]++;
+                case 'P' -> counts[1]++;
+                case 'S' -> counts[2]++;
+                default -> throw new RuntimeException("Incorrect character in line");
+            }
+        }
+        if (counts[0] != rocks) {
+            throw new RuntimeException("Incorrect amount of rocks");
+        }
+        if (counts[1] != papers) {
+            throw new RuntimeException("Incorrect amount of papers");
+        }
+        if (counts[2] != scissors) {
+            throw new RuntimeException("Incorrect amount of scissors");
+        }
+
+        //checking if the winner is scissors
+        Tournament t = new Tournament(line);
+        if (t.getRoot().calcParticipant().getChar() != 'S') {
+            throw new RuntimeException("Scissors should win");
+        }
     }
 
 

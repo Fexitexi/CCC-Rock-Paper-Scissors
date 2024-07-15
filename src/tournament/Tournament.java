@@ -145,6 +145,7 @@ public class Tournament {
 
     public String buildWinner(int prohibited, int neutral, int winner, FightingStyle winningStyle) {
         int total = prohibited + neutral + winner;
+        System.out.println("Prohibited: " + prohibited + " Neutral: " + neutral + " Winner: " + winner + " Total: " + total);
         String res = "";
         //base case no winners
         if (winner <= 0) {
@@ -188,8 +189,8 @@ public class Tournament {
         if (prohibited >= (total / 2 - 1)){
             //prohibited and neutral fill the left side
             prohibitedL = total / 2 - 1;
-            neutralL = 1;
-            winnerL = 0;
+            neutralL = Math.min(1, neutral);
+            winnerL = total / 2 - prohibitedL - neutralL;
         } else {
             prohibitedL = prohibited;
             neutralL = Math.min(neutral, total / 2 - prohibitedL);

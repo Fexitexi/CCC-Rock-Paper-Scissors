@@ -92,9 +92,7 @@ public class Main {
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
         Tournament t = new Tournament(rocks, papers, scissors, new Scissors());
-
-        //System.out.println("Rocks: " + rocks + ", Papers: " + papers + ", scissors: " + scissors);
-        System.out.println(t.getRoot().calcParticipant().getChar());
+        //t.getRoot().checkSolutionLevel4(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(t.getLevels()));
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 }
