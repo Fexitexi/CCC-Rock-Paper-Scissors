@@ -28,7 +28,7 @@ public class Tournament {
         this.root = createFirstRoundRec(this.participants, 0);
     }
 
-    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle){
+    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound){
         //attributing winning, neutral and prohibited Style and amount
         FightingStyle prohibitedStyle = winningStyle.getsBeatenBy();
         FightingStyle neutralStyle = prohibitedStyle.getsBeatenBy();
@@ -61,8 +61,6 @@ public class Tournament {
             participants.add(prohibitedStyle);
             participants.add(prohibitedStyle);
             participants.add(neutralStyle);
-
-            amountMap.replace(prohibitedStyle, amountMap.get(prohibitedStyle) - 3);
             amountMap.replace(neutralStyle, amountMap.get(neutralStyle) - 1);
         }
         //clear edge case (2 prohibited, 1 neutral)
@@ -86,12 +84,38 @@ public class Tournament {
             participants.add(winningStyle);
         }
 
-        System.out.println(FightingStyle.getCharsFromList(participants));
-
         this.participants = participants;
         this.levels = (int) (Math.log(participants.size()) / Math.log(2));
         //building tournament tree
         this.root = createFirstRoundRec(participants, 0);
+    }
+
+    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
+        String res;
+        List<FightingStyle> participants = new ArrayList<>();
+
+        switch (winningStyle) {
+            case Paper paper -> {
+                res = buildWinner(scissors, rocks, papers, paper);
+            }
+            case Rock rock -> {
+                res = buildWinner(papers, scissors, rocks, rock);
+            }
+            case Scissors scissor -> {
+                res = buildWinner(rocks, papers, scissors, scissor);
+            }
+            default -> {
+                throw new RuntimeException("Incorrect FightingStyle as input");
+            }
+        }
+
+        for (int i = 0; i < res.length(); i++) {
+            participants.add(FightingStyle.parseCharToFightingStyle(res.charAt(i)));
+        }
+
+        this.participants = participants;
+        this.levels = (int) (Math.log(participants.size()) / Math.log(2));
+        this.root = createFirstRoundRec(this.participants, 0);
     }
 
     public TournamentBranch getRoot(){
@@ -117,6 +141,63 @@ public class Tournament {
                 .withLowerBranch(createFirstRoundRec(participants.subList(participants.size() / 2, participants.size()), level + 1))
                 .withLevel(level)
                 .build();
+    }
+
+    public String buildWinner(int prohibited, int neutral, int winner, FightingStyle winningStyle) {
+        int total = prohibited + neutral + winner;
+        String res = "";
+        //base case no winners
+        if (winner <= 0) {
+            for (int i = 0; i < prohibited; i++) {
+                res = res + winningStyle.getsBeatenBy().getChar();
+            }
+            for (int i = 0; i < neutral; i++) {
+                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
+            }
+            return res;
+        }
+        //base case no prohibited
+        if (prohibited <= 0) {
+            for (int i = 0; i < neutral; i++) {
+                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
+            }
+            for (int i = 0; i < winner; i++) {
+                res = res + winningStyle.getChar();
+            }
+            return res;
+        }
+        //base case only two left
+        if (total == 2) {
+            for (int i = 0; i < prohibited; i++) {
+                res = res + winningStyle.getsBeatenBy().getChar();
+            }
+            for (int i = 0; i < neutral; i++) {
+                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
+            }
+            for (int i = 0; i < winner; i++) {
+                res = res + winningStyle.getChar();
+            }
+            return res;
+        }
+
+        //difficult case
+        int prohibitedL;
+        int neutralL;
+        int winnerL;
+
+        if (prohibited >= (total / 2 - 1)){
+            //prohibited and neutral fill the left side
+            prohibitedL = total / 2 - 1;
+            neutralL = 1;
+            winnerL = 0;
+        } else {
+            prohibitedL = prohibited;
+            neutralL = Math.min(neutral, total / 2 - prohibitedL);
+            winnerL = (total / 2) - prohibitedL - neutralL;
+        }
+
+        return buildWinner(prohibitedL, neutralL, winnerL, winningStyle) +
+                buildWinner(prohibited - prohibitedL, neutral - neutralL, winner - winnerL, winningStyle);
     }
 
 }

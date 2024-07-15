@@ -19,7 +19,7 @@ public abstract class FightingStyle {
         }else {
             throw new RuntimeException("Wrong Char Input!");
         }
-    };
+    }
 
     public abstract char getChar();
 
