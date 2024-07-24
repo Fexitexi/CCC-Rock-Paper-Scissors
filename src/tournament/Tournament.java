@@ -1,11 +1,9 @@
 package tournament;
 
-import fightingStyles.FightingStyle;
-import fightingStyles.Paper;
-import fightingStyles.Rock;
-import fightingStyles.Scissors;
+import fightingStyles.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -90,7 +88,7 @@ public class Tournament {
         this.root = createFirstRoundRec(participants, 0);
     }
 
-    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
+    /*public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
         String res;
         List<FightingStyle> participants = new ArrayList<>();
 
@@ -111,6 +109,56 @@ public class Tournament {
 
         for (int i = 0; i < res.length(); i++) {
             participants.add(FightingStyle.parseCharToFightingStyle(res.charAt(i)));
+        }
+
+        this.participants = participants;
+        this.levels = (int) (Math.log(participants.size()) / Math.log(2));
+        this.root = createFirstRoundRec(this.participants, 0);
+    }*/
+
+    public Tournament(int rocks, int papers, int scissors, int spocks, int lizards, FightingStyle winningStyle) {
+        List<FightingStyle> participants = new ArrayList<>();
+
+        for (int i = 0; i < rocks; i++) {
+            participants.add(Rock.getInstance());
+        }
+        for (int i = 0; i < papers; i++) {
+            participants.add(Paper.getInstance());
+        }
+        for (int i = 0; i < scissors; i++) {
+            participants.add(Scissors.getInstance());
+        }
+        for (int i = 0; i < spocks; i++) {
+            participants.add(Spock.getInstance());
+        }
+        for (int i = 0; i < lizards; i++) {
+            participants.add(Lizard.getInstance());
+        }
+
+        switch (winningStyle) {
+            case Paper paper -> {
+                participants = buildWinner(participants, paper);
+            }
+            case Rock rock -> {
+                participants = buildWinner(participants, rock);
+            }
+            case Scissors scissor -> {
+                System.out.println("Initital: ");
+                for (FightingStyle fightingStyle : participants) {
+                    System.out.print(fightingStyle.getChar());
+                }
+                System.out.println();
+                participants = buildWinner(participants, scissor);
+            }
+            case Spock spock -> {
+                participants = buildWinner(participants, spock);
+            }
+            case Lizard lizard -> {
+                participants = buildWinner(participants, lizard);
+            }
+            default -> {
+                throw new RuntimeException("Incorrect FightingStyle as input");
+            }
         }
 
         this.participants = participants;
@@ -143,62 +191,83 @@ public class Tournament {
                 .build();
     }
 
-    public String buildWinner(int prohibited, int neutral, int winner, FightingStyle winningStyle) {
-        int total = prohibited + neutral + winner;
-        System.out.println("Prohibited: " + prohibited + " Neutral: " + neutral + " Winner: " + winner + " Total: " + total);
-        String res = "";
+    public List<FightingStyle> buildWinner(List<FightingStyle> participants, FightingStyle winningStyle) {
+        for (FightingStyle style : participants) {
+            //System.out.print(style.getChar());
+        }
+        System.out.print("\n");
+        int total = participants.size();
+        List<FightingStyle> res = new ArrayList<>();
         //base case no winners
-        if (winner <= 0) {
-            for (int i = 0; i < prohibited; i++) {
-                res = res + winningStyle.getsBeatenBy().getChar();
-            }
-            for (int i = 0; i < neutral; i++) {
-                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
-            }
-            return res;
+        if (participants.stream().noneMatch(f -> f.equals(winningStyle))) {
+            return participants;
         }
         //base case no prohibited
-        if (prohibited <= 0) {
-            for (int i = 0; i < neutral; i++) {
-                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
-            }
-            for (int i = 0; i < winner; i++) {
-                res = res + winningStyle.getChar();
-            }
-            return res;
+        if (participants.stream().noneMatch(f -> f.fights(winningStyle).equals(f) && !f.equals(winningStyle))) {
+            return participants;
         }
         //base case only two left
         if (total == 2) {
-            for (int i = 0; i < prohibited; i++) {
-                res = res + winningStyle.getsBeatenBy().getChar();
-            }
-            for (int i = 0; i < neutral; i++) {
-                res = res + winningStyle.getsBeatenBy().getsBeatenBy().getChar();
-            }
-            for (int i = 0; i < winner; i++) {
-                res = res + winningStyle.getChar();
-            }
-            return res;
+            return participants;
         }
 
         //difficult case
-        int prohibitedL;
-        int neutralL;
-        int winnerL;
+        List<FightingStyle> lList = new ArrayList<>();
 
-        if (prohibited >= (total / 2 - 1)){
-            //prohibited and neutral fill the left side
-            prohibitedL = total / 2 - 1;
-            neutralL = Math.min(1, neutral);
-            winnerL = total / 2 - prohibitedL - neutralL;
-        } else {
-            prohibitedL = prohibited;
-            neutralL = Math.min(neutral, total / 2 - prohibitedL);
-            winnerL = (total / 2) - prohibitedL - neutralL;
+        //sort the List
+        participants.sort(winningStyle.getComparator());
+
+        //split the List
+        FightingStyle toBeAdded = participants.getFirst();
+        while (lList.size() < total / 2) {
+            lList.add(participants.removeFirst());
+
+            //check if there is no style change in next participant
+            if (!participants.getFirst().equals(toBeAdded) && lList.size() < total / 2 - 1) {
+                FightingStyle oldStyle = toBeAdded;
+                toBeAdded = participants.getFirst();
+
+                //check if one step was skipped
+                if (!oldStyle.getsBeatenBy().equals(toBeAdded)) {
+                    //step was skipped, so add it to the front of the list
+                    lList.addFirst(participants.removeFirst());
+                }
+            }
+
+            //if there is only one slot left
+            if (lList.size() >= (total / 2) - 1) {
+                //make sure to neutralise this half
+                if (toBeAdded.fights(winningStyle).equals(toBeAdded)) {
+                    //all prohibited styles so far
+                    if (toBeAdded.equals(lList.getFirst())) {
+                        //same style all the way
+                        lList.add(toBeAdded.getsDoubleBeatenBy());
+                        participants.remove(toBeAdded.getsDoubleBeatenBy());
+                    } else {
+                        //different style
+                        lList.add(toBeAdded.getsBeatenBy());
+                        participants.remove(toBeAdded.getsBeatenBy());
+                    }
+                } else {
+                    lList.add(participants.removeFirst());
+                }
+            }
+
         }
 
-        return buildWinner(prohibitedL, neutralL, winnerL, winningStyle) +
-                buildWinner(prohibited - prohibitedL, neutral - neutralL, winner - winnerL, winningStyle);
-    }
+        System.out.println("Left Side: ");
+        for (FightingStyle fightingStyle : lList) {
+            System.out.print(fightingStyle.getChar());
+        }
+        System.out.println();
+        System.out.println("Right Side: ");
+        for (FightingStyle participant : participants) {
+            System.out.print(participant.getChar());
+        }
 
+        res = buildWinner(lList, winningStyle);
+        res.addAll(buildWinner(participants, winningStyle));
+
+        return res;
+    }
 }

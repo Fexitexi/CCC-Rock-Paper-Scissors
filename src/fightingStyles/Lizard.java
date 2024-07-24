@@ -2,20 +2,20 @@ package fightingStyles;
 
 import java.util.Comparator;
 
-public class Rock extends FightingStyle{
+public class Lizard extends FightingStyle{
 
-    private static Rock instance;
+    private static Lizard instance;
 
-    public static Rock getInstance() {
+    public static Lizard getInstance() {
         if (instance == null) {
-            instance = new Rock();
+            instance = new Lizard();
         }
         return instance;
     }
 
     @Override
     public FightingStyle fights(FightingStyle other) {
-        if (other.beatsRock()){
+        if(other.beatsLizard()){
             return other;
         } else {
             return this;
@@ -23,53 +23,53 @@ public class Rock extends FightingStyle{
     }
 
     @Override
-    public boolean beatsRock() {
-        return true;
-    }
-
-    @Override
-    public boolean beatsScissors() {
-        return true;
-    }
-
-    @Override
-    public boolean beatsPaper() {
-        return false;
-    }
-
-    @Override
-    public boolean beatsLizard() {
-        return true;
-    }
-
-    @Override
-    public boolean beatsSpock() {
-        return false;
-    }
-
-    @Override
-    public char getChar() {
-        return 'R';
-    }
-
-    @Override
     public FightingStyle getsBeatenBy() {
-        return Spock.getInstance();
-    }
-
-    @Override
-    public FightingStyle getsDoubleBeatenBy(){
-        return Paper.getInstance();
-    }
-
-    @Override
-    public FightingStyle getBeats(){
         return Scissors.getInstance();
     }
 
     @Override
+    public FightingStyle getsDoubleBeatenBy(){
+        return Rock.getInstance();
+    }
+
+    @Override
+    public FightingStyle getBeats(){
+        return Paper.getInstance();
+    }
+
+    @Override
     public FightingStyle getDoubleBeats(){
-        return Lizard.getInstance();
+        return Spock.getInstance();
+    }
+
+    @Override
+    boolean beatsRock() {
+        return false;
+    }
+
+    @Override
+    boolean beatsScissors() {
+        return false;
+    }
+
+    @Override
+    boolean beatsPaper() {
+        return true;
+    }
+
+    @Override
+    boolean beatsLizard() {
+        return true;
+    }
+
+    @Override
+    boolean beatsSpock() {
+        return true;
+    }
+
+    @Override
+    public char getChar() {
+        return 'L';
     }
 
     @Override
