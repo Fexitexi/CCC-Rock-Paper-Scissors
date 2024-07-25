@@ -198,16 +198,15 @@ public class Tournament {
         System.out.print("\n");
         int total = participants.size();
         List<FightingStyle> res = new ArrayList<>();
-        //base case no winners
-        if (participants.stream().noneMatch(f -> f.equals(winningStyle))) {
-            return participants;
-        }
+
         //base case no prohibited
         if (participants.stream().noneMatch(f -> f.fights(winningStyle).equals(f) && !f.equals(winningStyle))) {
+            System.out.println("base case 1 reached");
             return participants;
         }
         //base case only two left
         if (total == 2) {
+            System.out.println("base case 2 reached");
             return participants;
         }
 
@@ -217,42 +216,34 @@ public class Tournament {
         //sort the List
         participants.sort(winningStyle.getComparator());
 
-        //split the List
         FightingStyle toBeAdded = participants.getFirst();
-        while (lList.size() < total / 2) {
+        FightingStyle leftWinner;
+
+        //split the List
+        if (participants.stream().anyMatch(fightingStyle -> fightingStyle.equals(winningStyle.getDoubleBeats())) || participants.stream().noneMatch(f -> f.equals(winningStyle.getsBeatenBy()))) {
+            lList.add(winningStyle.getDoubleBeats());
+            if(!participants.remove(winningStyle.getDoubleBeats())) {
+                throw new RuntimeException("remove didn't work");
+            }
+            while (participants.getFirst().equals(toBeAdded) && lList.size() < participants.size()){
+                lList.add(participants.removeFirst());
+            }
+            leftWinner = winningStyle.getDoubleBeats();
+        } else {
+            lList.add(toBeAdded.getDoubleBeats());
+            if(!participants.remove(toBeAdded.getDoubleBeats())) {
+                throw new RuntimeException("remove didn't work");
+            }
+            for (int i = 0; i < Math.log(participants.size() / 2.0) / Math.log(2); i++) {
+                if(participants.remove(toBeAdded.getsBeatenBy())) {
+                    lList.add(toBeAdded.getsBeatenBy());
+                }
+            }
+            leftWinner = toBeAdded.getDoubleBeats();
+        }
+
+        while (lList.size() < participants.size()) {
             lList.add(participants.removeFirst());
-
-            //check if there is no style change in next participant
-            if (!participants.getFirst().equals(toBeAdded) && lList.size() < total / 2 - 1) {
-                FightingStyle oldStyle = toBeAdded;
-                toBeAdded = participants.getFirst();
-
-                //check if one step was skipped
-                if (!oldStyle.getsBeatenBy().equals(toBeAdded)) {
-                    //step was skipped, so add it to the front of the list
-                    lList.addFirst(participants.removeFirst());
-                }
-            }
-
-            //if there is only one slot left
-            if (lList.size() >= (total / 2) - 1) {
-                //make sure to neutralise this half
-                if (toBeAdded.fights(winningStyle).equals(toBeAdded)) {
-                    //all prohibited styles so far
-                    if (toBeAdded.equals(lList.getFirst())) {
-                        //same style all the way
-                        lList.add(toBeAdded.getsDoubleBeatenBy());
-                        participants.remove(toBeAdded.getsDoubleBeatenBy());
-                    } else {
-                        //different style
-                        lList.add(toBeAdded.getsBeatenBy());
-                        participants.remove(toBeAdded.getsBeatenBy());
-                    }
-                } else {
-                    lList.add(participants.removeFirst());
-                }
-            }
-
         }
 
         System.out.println("Left Side: ");
@@ -265,7 +256,7 @@ public class Tournament {
             System.out.print(participant.getChar());
         }
 
-        res = buildWinner(lList, winningStyle);
+        res = buildWinner(lList, leftWinner);
         res.addAll(buildWinner(participants, winningStyle));
 
         return res;

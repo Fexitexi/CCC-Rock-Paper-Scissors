@@ -106,6 +106,7 @@ public class Main {
 
         Tournament t = new Tournament(rocks, papers, scissors, spock, lizard, Scissors.getInstance());
         t.getRoot().checkSolutionLevel5(rocks, papers, scissors, spock, lizard, t.getRoot().getStandingsAtLevel(t.getLevels()));
+        System.out.println("successful generation");
         return t.getRoot().getStandingsAtLevel(0);
     }
 }

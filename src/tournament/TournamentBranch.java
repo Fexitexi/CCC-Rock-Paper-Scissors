@@ -1,7 +1,6 @@
 package tournament;
 
 import fightingStyles.FightingStyle;
-import fightingStyles.Scissors;
 
 public class TournamentBranch {
     private TournamentBranch upperBranch;
