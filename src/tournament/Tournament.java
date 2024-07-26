@@ -199,6 +199,11 @@ public class Tournament {
         int total = participants.size();
         List<FightingStyle> res = new ArrayList<>();
 
+        if (Scissors.getInstance().getComparator().compare(winningStyle, new Tournament(FightingStyle.getCharsFromList(participants)).root.calcParticipant()) <= 0) {
+            System.out.println("true base case 1");
+            return participants;
+        }
+
         //base case no prohibited
         if (participants.stream().noneMatch(f -> f.fights(winningStyle).equals(f) && !f.equals(winningStyle))) {
             System.out.println("base case 1 reached");
@@ -214,32 +219,38 @@ public class Tournament {
         List<FightingStyle> lList = new ArrayList<>();
 
         //sort the List
-        participants.sort(winningStyle.getComparator());
+        participants.sort(Scissors.getInstance().getComparator());
+
 
         FightingStyle toBeAdded = participants.getFirst();
         FightingStyle leftWinner;
 
         //split the List
-        if (participants.stream().anyMatch(fightingStyle -> fightingStyle.equals(winningStyle.getDoubleBeats())) || participants.stream().noneMatch(f -> f.equals(winningStyle.getsBeatenBy()))) {
-            lList.add(winningStyle.getDoubleBeats());
-            if(!participants.remove(winningStyle.getDoubleBeats())) {
+        if (participants.stream().anyMatch(fightingStyle -> fightingStyle.equals(winningStyle.getDoubleBeats()))) {
+            leftWinner = winningStyle.getDoubleBeats();
+            lList.add(leftWinner);
+            if(!participants.remove(leftWinner)) {
                 throw new RuntimeException("remove didn't work");
             }
             while (participants.getFirst().equals(toBeAdded) && lList.size() < participants.size()){
                 lList.add(participants.removeFirst());
             }
-            leftWinner = winningStyle.getDoubleBeats();
         } else {
-            lList.add(toBeAdded.getDoubleBeats());
-            if(!participants.remove(toBeAdded.getDoubleBeats())) {
+            leftWinner = winningStyle.getBeats();
+            lList.add(leftWinner);
+            if(!participants.remove(leftWinner)) {
                 throw new RuntimeException("remove didn't work");
             }
-            for (int i = 0; i < Math.log(participants.size() / 2.0) / Math.log(2); i++) {
-                if(participants.remove(toBeAdded.getsBeatenBy())) {
-                    lList.add(toBeAdded.getsBeatenBy());
+            if (participants.stream().anyMatch(f -> f.equals(leftWinner.getsDoubleBeatenBy()))) {
+                //then there needs to be max this amount to neutralise else just fill with
+                for (int i = 0; i < Math.log(participants.size() / 2.0) / Math.log(2); i++) {
+                    if(participants.remove(leftWinner.getDoubleBeats())) {
+                        lList.add(leftWinner.getDoubleBeats());
+                    } else {
+                        break;
+                    }
                 }
             }
-            leftWinner = toBeAdded.getDoubleBeats();
         }
 
         while (lList.size() < participants.size()) {
