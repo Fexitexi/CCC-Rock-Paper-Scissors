@@ -88,33 +88,43 @@ public class Tournament {
         this.root = createFirstRoundRec(participants, 0);
     }
 
-    /*public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
-        String res;
+    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
         List<FightingStyle> participants = new ArrayList<>();
+
+        for (int i = 0; i < rocks; i++) {
+            participants.add(Rock.getInstance());
+        }
+        for (int i = 0; i < papers; i++) {
+            participants.add(Paper.getInstance());
+        }
+        for (int i = 0; i < scissors; i++) {
+            participants.add(Scissors.getInstance());
+        }
 
         switch (winningStyle) {
             case Paper paper -> {
-                res = buildWinner(scissors, rocks, papers, paper);
+                participants = buildWinner(participants, Paper.getInstance());
             }
             case Rock rock -> {
-                res = buildWinner(papers, scissors, rocks, rock);
+                participants = buildWinner(participants, Rock.getInstance());
             }
             case Scissors scissor -> {
-                res = buildWinner(rocks, papers, scissors, scissor);
+                System.out.println("Initital: ");
+                for (FightingStyle fightingStyle : participants) {
+                    System.out.print(fightingStyle.getChar());
+                }
+                System.out.println();
+                participants = buildWinner(participants, Scissors.getInstance());
             }
             default -> {
                 throw new RuntimeException("Incorrect FightingStyle as input");
             }
         }
 
-        for (int i = 0; i < res.length(); i++) {
-            participants.add(FightingStyle.parseCharToFightingStyle(res.charAt(i)));
-        }
-
         this.participants = participants;
         this.levels = (int) (Math.log(participants.size()) / Math.log(2));
         this.root = createFirstRoundRec(this.participants, 0);
-    }*/
+    }
 
     public Tournament(int rocks, int papers, int scissors, int spocks, int lizards, FightingStyle winningStyle) {
         List<FightingStyle> participants = new ArrayList<>();
@@ -137,10 +147,10 @@ public class Tournament {
 
         switch (winningStyle) {
             case Paper paper -> {
-                participants = buildWinner(participants, paper);
+                participants = buildWinner(participants, Paper.getInstance());
             }
             case Rock rock -> {
-                participants = buildWinner(participants, rock);
+                participants = buildWinner(participants, Rock.getInstance());
             }
             case Scissors scissor -> {
                 System.out.println("Initital: ");
@@ -148,13 +158,13 @@ public class Tournament {
                     System.out.print(fightingStyle.getChar());
                 }
                 System.out.println();
-                participants = buildWinner(participants, scissor);
+                participants = buildWinner(participants, Scissors.getInstance());
             }
             case Spock spock -> {
-                participants = buildWinner(participants, spock);
+                participants = buildWinner(participants, Spock.getInstance());
             }
             case Lizard lizard -> {
-                participants = buildWinner(participants, lizard);
+                participants = buildWinner(participants, Lizard.getInstance());
             }
             default -> {
                 throw new RuntimeException("Incorrect FightingStyle as input");
@@ -192,26 +202,8 @@ public class Tournament {
     }
 
     public List<FightingStyle> buildWinner(List<FightingStyle> participants, FightingStyle winningStyle) {
-        for (FightingStyle style : participants) {
-            //System.out.print(style.getChar());
-        }
-        System.out.print("\n");
-        int total = participants.size();
-        List<FightingStyle> res = new ArrayList<>();
 
         if (Scissors.getInstance().getComparator().compare(winningStyle, new Tournament(FightingStyle.getCharsFromList(participants)).root.calcParticipant()) <= 0) {
-            System.out.println("true base case 1");
-            return participants;
-        }
-
-        //base case no prohibited
-        if (participants.stream().noneMatch(f -> f.fights(winningStyle).equals(f) && !f.equals(winningStyle))) {
-            System.out.println("base case 1 reached");
-            return participants;
-        }
-        //base case only two left
-        if (total == 2) {
-            System.out.println("base case 2 reached");
             return participants;
         }
 
@@ -229,18 +221,16 @@ public class Tournament {
         if (participants.stream().anyMatch(fightingStyle -> fightingStyle.equals(winningStyle.getDoubleBeats()))) {
             leftWinner = winningStyle.getDoubleBeats();
             lList.add(leftWinner);
-            if(!participants.remove(leftWinner)) {
-                throw new RuntimeException("remove didn't work");
-            }
+            participants.remove(leftWinner);
+
             while (participants.getFirst().equals(toBeAdded) && lList.size() < participants.size()){
                 lList.add(participants.removeFirst());
             }
         } else {
             leftWinner = winningStyle.getBeats();
             lList.add(leftWinner);
-            if(!participants.remove(leftWinner)) {
-                throw new RuntimeException("remove didn't work");
-            }
+            participants.remove(leftWinner);
+
             if (participants.stream().anyMatch(f -> f.equals(leftWinner.getsDoubleBeatenBy()))) {
                 //then there needs to be max this amount to neutralise else just fill with
                 for (int i = 0; i < Math.log(participants.size() / 2.0) / Math.log(2); i++) {
@@ -257,19 +247,8 @@ public class Tournament {
             lList.add(participants.removeFirst());
         }
 
-        System.out.println("Left Side: ");
-        for (FightingStyle fightingStyle : lList) {
-            System.out.print(fightingStyle.getChar());
-        }
-        System.out.println();
-        System.out.println("Right Side: ");
-        for (FightingStyle participant : participants) {
-            System.out.print(participant.getChar());
-        }
-
-        res = buildWinner(lList, leftWinner);
+        List<FightingStyle> res = buildWinner(lList, leftWinner);
         res.addAll(buildWinner(participants, winningStyle));
-
         return res;
     }
 }

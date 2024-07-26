@@ -1,6 +1,4 @@
 import fightingStyles.FightingStyle;
-import fightingStyles.Paper;
-import fightingStyles.Rock;
 import fightingStyles.Scissors;
 import tournament.Tournament;
 
@@ -51,7 +49,8 @@ public class Main {
             //result = solveLevel2(line);
             //result = solveLevel3(line);
             //result = solveLevel4(line);
-            result = solveLevel5(line);
+            //result = solveLevel5(line);
+            result = solveLevel6(line);
 
             //write result to file
             writer.write(result + "\n");
@@ -82,7 +81,7 @@ public class Main {
         int papers = Integer.parseInt(line.substring(line.indexOf('R') + 2, line.indexOf('P')));
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
-        Tournament t = new Tournament(rocks, papers, scissors, new Scissors(), 2);
+        Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance(), 2);
 
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
@@ -92,9 +91,9 @@ public class Main {
         int papers = Integer.parseInt(line.substring(line.indexOf('R') + 2, line.indexOf('P')));
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
-        //Tournament t = new Tournament(rocks, papers, scissors, new Scissors());
-        //t.getRoot().checkSolutionLevel4(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(t.getLevels()));
-        return null; //t.getRoot().getStandingsAtLevel(t.getLevels());
+        Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance());
+        t.getRoot().checkSolutionLevel4(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(t.getLevels()));
+        return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
     public static String solveLevel5(String line) {
@@ -108,5 +107,9 @@ public class Main {
         t.getRoot().checkSolutionLevel5(rocks, papers, scissors, spock, lizard, t.getRoot().getStandingsAtLevel(t.getLevels()));
         System.out.println("successful generation");
         return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static String solveLevel6(String line) {
+        return "";
     }
 }
