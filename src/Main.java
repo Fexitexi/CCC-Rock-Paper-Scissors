@@ -47,7 +47,7 @@ public class Main {
             String line = reader.nextLine();
             //result = solveLevel1(line);
             //result = solveLevel2(line);
-            //result = solveLevel3(line);
+            //result = solveLevel3(line, 2);
             //result = solveLevel4(line);
             //result = solveLevel5(line);
             result = solveLevel6(line);
@@ -110,15 +110,24 @@ public class Main {
         return t.getRoot().getStandingsAtLevel(t.getLevels() - 2);
     }
 
-    public static String solveLevel3(String line){
+    public static String solveLevel3(String line, int safeRound){
         //parse String into amounts
         int rocks = Integer.parseInt(line.substring(0, line.indexOf('R')));
         int papers = Integer.parseInt(line.substring(line.indexOf('R') + 2, line.indexOf('P')));
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
-        Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance(), 2);
+        Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance(), safeRound);
+        checkSolutionLevel3(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(safeRound), Scissors.getInstance());
 
         return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static void checkSolutionLevel3(int rocks, int papers, int scissors, String line, FightingStyle WinningStyle){
+        checkOccurences(rocks, papers, scissors, 0, 0, line);
+        //checking if the winner is scissors
+        if (!line.contains("S") || line.contains("R")) {
+            throw new RuntimeException("Scissors should win");
+        }
     }
 
     public static String solveLevel4(String line) {
