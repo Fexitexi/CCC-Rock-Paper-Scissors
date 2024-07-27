@@ -57,6 +57,41 @@ public class Main {
         }
     }
 
+    private static void checkOccurences(int rocks, int papers, int scissors, int spocks, int lizard, String line) {
+        int total = rocks + papers + scissors + spocks + lizard;
+        if (total != line.length()) {
+            throw new RuntimeException("Incorrect line length");
+        }
+
+        //counting the occurences of the fighting styles
+        int[] counts = new int[5];
+        for (int i = 0; i < line.length(); i++) {
+            switch (line.charAt(i)) {
+                case 'R' -> counts[0]++;
+                case 'P' -> counts[1]++;
+                case 'S' -> counts[2]++;
+                case 'Y' -> counts[3]++;
+                case 'L' -> counts[4]++;
+                default -> throw new RuntimeException("Incorrect character in line");
+            }
+        }
+        if (counts[0] != rocks) {
+            throw new RuntimeException("Incorrect amount of rocks");
+        }
+        if (counts[1] != papers) {
+            throw new RuntimeException("Incorrect amount of papers");
+        }
+        if (counts[2] != scissors) {
+            throw new RuntimeException("Incorrect amount of scissors");
+        }
+        if (counts[3] != spocks) {
+            throw new RuntimeException("Incorrect amount of spocks");
+        }
+        if (counts[4] != lizard) {
+            throw new RuntimeException("Incorrect amount of lizard");
+        }
+    }
+
     public static String solveLevel1(String line) {
         //parse input into object array
         FightingStyle[] fightingStyles = new FightingStyle[2];
@@ -92,8 +127,17 @@ public class Main {
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
         Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance());
-        t.getRoot().checkSolutionLevel4(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(t.getLevels()));
+        checkSolutionLevel4(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(t.getLevels()));
         return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static void checkSolutionLevel4(int rocks, int papers, int scissors, String line){
+        checkOccurences(rocks, papers, scissors, 0, 0, line);
+        //checking if the winner is scissors
+        Tournament t = new Tournament(line);
+        if (t.getRoot().calcParticipant().getChar() != 'S') {
+            throw new RuntimeException("Scissors should win");
+        }
     }
 
     public static String solveLevel5(String line) {
@@ -104,9 +148,17 @@ public class Main {
         int lizard = Integer.parseInt(line.substring(line.indexOf('Y') + 2, line.indexOf('L')));
 
         Tournament t = new Tournament(rocks, papers, scissors, spock, lizard, Scissors.getInstance());
-        t.getRoot().checkSolutionLevel5(rocks, papers, scissors, spock, lizard, t.getRoot().getStandingsAtLevel(t.getLevels()));
+        checkSolutionLevel5(rocks, papers, scissors, spock, lizard, t.getRoot().getStandingsAtLevel(t.getLevels()));
         System.out.println("successful generation");
         return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static void checkSolutionLevel5(int rocks, int papers, int scissors, int spocks, int lizard, String line){
+        checkOccurences(rocks, papers, scissors, spocks, lizard, line);
+        Tournament t = new Tournament(line);
+        if (t.getRoot().calcParticipant().getChar() != 'S') {
+            throw new RuntimeException("Scissors should win");
+        }
     }
 
     private static String solveLevel6(String line) {
