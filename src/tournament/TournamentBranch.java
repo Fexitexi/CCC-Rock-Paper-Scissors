@@ -1,6 +1,14 @@
 package tournament;
 
-import fightingStyles.FightingStyle;
+import fightingStyles.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class TournamentBranch {
     private TournamentBranch upperBranch;
@@ -10,6 +18,60 @@ public class TournamentBranch {
 
     //Constructor
     private TournamentBranch(){
+    }
+
+    public TournamentBranch(List<FightingStyle> participants, int level) {
+        //base case
+        if (participants.size() <= 1) {
+            this.participant = participants.getFirst();
+            this.level = level;
+            this.lowerBranch = null;
+            this.upperBranch = null;
+        } else {
+            //splitting Array and making recursive calls
+            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), level + 1);
+            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), level + 1);
+            this.level = level;
+        }
+    }
+
+    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level){
+        //TODO: terribly inefficient, basically recalculating the tree twice for each branch
+        this.level = level;
+
+        if (participants.stream().noneMatch(p -> p.equals(Undefined.getInstance()))){
+            //base case, all participants are defined
+            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2),level + 1);
+            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()),level + 1);
+            return;
+        }
+
+        if (participants.size() == 2){
+            //base case, only two participants one of them is undefined
+            if(participants.get(0).equals(Undefined.getInstance()) && participants.get(1).equals(Undefined.getInstance())) {
+                this.upperBranch = new TournamentBranch(List.of(winningStyle),level + 1);
+                this.lowerBranch = new TournamentBranch(List.of(winningStyle),level + 1);
+            } else if (participants.get(0).equals(Undefined.getInstance())){
+                this.upperBranch = new TournamentBranch(List.of(winningStyle),level + 1);
+                this.lowerBranch = new TournamentBranch(List.of(participants.get(1)),level + 1);
+            } else {
+                this.upperBranch = new TournamentBranch(List.of(participants.get(0)),level + 1);
+                this.lowerBranch = new TournamentBranch(List.of(winningStyle),level + 1);
+            }
+            return;
+        }
+
+        List<FightingStyle> upperWinners = possibleWinners(participants.subList(0, participants.size() / 2)).stream().filter(p -> p.fights(winningStyle).equals(winningStyle)).toList();
+        List<FightingStyle> lowerWinners = possibleWinners(participants.subList(participants.size() / 2, participants.size())).stream().filter(p -> p.fights(winningStyle).equals(winningStyle)).toList();
+
+        if (upperWinners.contains(winningStyle)){
+            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), winningStyle, level + 1);
+            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), lowerWinners.getFirst(), level + 1);
+        } else {
+            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), upperWinners.getFirst(), level + 1);
+            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), winningStyle, level + 1);
+        }
+
     }
 
     //Setter
@@ -61,6 +123,27 @@ public class TournamentBranch {
         }
 
         return this.upperBranch.getStandingsAtLevel(level) + this.lowerBranch.getStandingsAtLevel(level);
+    }
+
+    private static List<FightingStyle> possibleWinners(List<FightingStyle> participants){
+        if (participants.size() == 1){
+            if (participants.getFirst().equals(Undefined.getInstance())){
+                return Arrays.asList(Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance());
+            }
+            return participants;
+        }
+
+        List<FightingStyle> upperWinners = possibleWinners(participants.subList(0, participants.size() / 2));
+        List<FightingStyle> lowerWinners = possibleWinners(participants.subList(participants.size() / 2, participants.size()));
+        List<FightingStyle> winners = new ArrayList<>();
+
+        for (FightingStyle upperWinner : upperWinners) {
+            for (FightingStyle lowerWinner : lowerWinners) {
+                winners.add(upperWinner.fights(lowerWinner));
+            }
+        }
+
+        return winners.stream().distinct().toList();
     }
 
     public static class TournamentBranchBuilder{

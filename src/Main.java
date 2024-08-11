@@ -117,15 +117,16 @@ public class Main {
         int scissors = Integer.parseInt(line.substring(line.indexOf('P') + 2, line.indexOf('S')));
 
         Tournament t = new Tournament(rocks, papers, scissors, Scissors.getInstance(), safeRound);
-        checkSolutionLevel3(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(safeRound), Scissors.getInstance());
+        checkSolutionLevel3(rocks, papers, scissors, t.getRoot().getStandingsAtLevel(0), safeRound);
 
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
-    private static void checkSolutionLevel3(int rocks, int papers, int scissors, String line, FightingStyle WinningStyle){
+    private static void checkSolutionLevel3(int rocks, int papers, int scissors, String line, int safeRound){
         checkOccurences(rocks, papers, scissors, 0, 0, line);
         //checking if the winner is scissors
-        if (!line.contains("S") || line.contains("R")) {
+        String resLine = new Tournament(line).getRoot().getStandingsAtLevel(safeRound);
+        if (!resLine.contains("S") || resLine.contains("R")) {
             throw new RuntimeException("Scissors should win");
         }
     }
@@ -171,6 +172,21 @@ public class Main {
     }
 
     private static String solveLevel6(String line) {
-        return "";
+        System.out.println("line: " + line);
+        Tournament t = new Tournament(line, Scissors.getInstance());
+        checkSolutionLevel6(t.getRoot().getStandingsAtLevel(t.getLevels()), line);
+        return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static void checkSolutionLevel6(String result, String line) {
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) != 'X' && line.charAt(i) != result.charAt(i)) {
+                throw new RuntimeException("The given chars are not in the correct spots");
+            }
+        }
+        Tournament t = new Tournament(result);
+        if (t.getRoot().calcParticipant().getChar() != 'S') {
+            throw new RuntimeException("Scissors should win");
+        }
     }
 }

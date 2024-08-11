@@ -18,15 +18,17 @@ public abstract class FightingStyle {
 
     public static FightingStyle parseCharToFightingStyle(char c){
         if (c == 'R') {
-            return new fightingStyles.Rock();
+            return Rock.getInstance();
         } else if (c == 'S') {
-            return new fightingStyles.Scissors();
+            return Scissors.getInstance();
         } else if (c == 'P') {
-            return new fightingStyles.Paper();
+            return Paper.getInstance();
         }else if (c == 'L') {
-            return new fightingStyles.Lizard();
+            return Lizard.getInstance();
         } else if (c == 'Y') {
-            return new fightingStyles.Spock();
+            return Spock.getInstance();
+        } else if (c == 'X'){
+            return Undefined.getInstance();
         } else {
             throw new RuntimeException("Wrong Char Input!");
         }

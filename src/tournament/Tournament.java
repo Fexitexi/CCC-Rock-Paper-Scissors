@@ -22,7 +22,22 @@ public class Tournament {
         }
 
         //create tournament branches recursively
-        this.root = createFirstRoundRec(this.participants, 0);
+        this.root = new TournamentBranch(this.participants, 0);
+    }
+
+    public Tournament(String participants, FightingStyle winningStyle) {
+        //calculate the levels of the tournament tree
+        this.levels = (int) (Math.log(participants.length()) / Math.log(2));
+
+        //parse the participants
+        this.participants = new ArrayList<>();
+        for (int i = 0; i < participants.length(); i++) {
+            this.participants.add(FightingStyle.parseCharToFightingStyle(participants.charAt(i)));
+        }
+
+        //create tournament branches recursively
+        this.root = new TournamentBranch(this.participants, winningStyle,0);
+        System.out.println("final result: " + this.root.getStandingsAtLevel(this.levels));
     }
 
     public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound){
@@ -87,7 +102,7 @@ public class Tournament {
         this.participants = participants;
         this.levels = (int) (Math.log(participants.size()) / Math.log(2));
         //building tournament tree
-        this.root = createFirstRoundRec(participants, 0);
+        this.root = new TournamentBranch(participants, 0);
     }
 
     public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle) {
@@ -125,7 +140,7 @@ public class Tournament {
 
         this.participants = participants;
         this.levels = (int) (Math.log(participants.size()) / Math.log(2));
-        this.root = createFirstRoundRec(this.participants, 0);
+        this.root = new TournamentBranch(this.participants, 0);
     }
 
     public Tournament(int rocks, int papers, int scissors, int spocks, int lizards, FightingStyle winningStyle) {
@@ -175,7 +190,7 @@ public class Tournament {
 
         this.participants = participants;
         this.levels = (int) (Math.log(participants.size()) / Math.log(2));
-        this.root = createFirstRoundRec(this.participants, 0);
+        this.root = new TournamentBranch(this.participants, 0);
     }
 
     public TournamentBranch getRoot(){
@@ -184,23 +199,6 @@ public class Tournament {
 
     public int getLevels(){
         return this.levels;
-    }
-
-    public TournamentBranch createFirstRoundRec(List<FightingStyle> participants, int level) {
-        //base case
-        if (participants.size() <= 1) {
-            return TournamentBranch.TournamentBranchBuilder.aBranch()
-                    .withParticipant(participants.getFirst())
-                    .withLevel(level)
-                    .build();
-        }
-
-        //splitting Array and making recursive calls
-        return TournamentBranch.TournamentBranchBuilder.aBranch()
-                .withUpperBranch(createFirstRoundRec(participants.subList(0, participants.size() / 2), level + 1))
-                .withLowerBranch(createFirstRoundRec(participants.subList(participants.size() / 2, participants.size()), level + 1))
-                .withLevel(level)
-                .build();
     }
 
     public List<FightingStyle> buildWinner(List<FightingStyle> participants, FightingStyle winningStyle) {
