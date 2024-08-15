@@ -39,25 +39,20 @@ public class TournamentBranch {
         //TODO: terribly inefficient, basically recalculating the tree twice for each branch
         this.level = level;
 
+        if (participants.size() == 1){
+            //base case, only two participants one of them is undefined
+            if (participants.getFirst().equals(Undefined.getInstance())){
+                this.participant = winningStyle;
+            } else {
+                this.participant = participants.getFirst();
+            }
+            return;
+        }
+
         if (participants.stream().noneMatch(p -> p.equals(Undefined.getInstance()))){
             //base case, all participants are defined
             this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2),level + 1);
             this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()),level + 1);
-            return;
-        }
-
-        if (participants.size() == 2){
-            //base case, only two participants one of them is undefined
-            if(participants.get(0).equals(Undefined.getInstance()) && participants.get(1).equals(Undefined.getInstance())) {
-                this.upperBranch = new TournamentBranch(List.of(winningStyle),level + 1);
-                this.lowerBranch = new TournamentBranch(List.of(winningStyle),level + 1);
-            } else if (participants.get(0).equals(Undefined.getInstance())){
-                this.upperBranch = new TournamentBranch(List.of(winningStyle),level + 1);
-                this.lowerBranch = new TournamentBranch(List.of(participants.get(1)),level + 1);
-            } else {
-                this.upperBranch = new TournamentBranch(List.of(participants.get(0)),level + 1);
-                this.lowerBranch = new TournamentBranch(List.of(winningStyle),level + 1);
-            }
             return;
         }
 

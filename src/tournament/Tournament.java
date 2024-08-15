@@ -37,7 +37,6 @@ public class Tournament {
 
         //create tournament branches recursively
         this.root = new TournamentBranch(this.participants, winningStyle,0);
-        System.out.println("final result: " + this.root.getStandingsAtLevel(this.levels));
     }
 
     public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound){

@@ -172,7 +172,6 @@ public class Main {
     }
 
     private static String solveLevel6(String line) {
-        System.out.println("line: " + line);
         Tournament t = new Tournament(line, Scissors.getInstance());
         checkSolutionLevel6(t.getRoot().getStandingsAtLevel(t.getLevels()), line);
         return t.getRoot().getStandingsAtLevel(t.getLevels());
