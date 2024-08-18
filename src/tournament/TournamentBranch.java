@@ -4,11 +4,7 @@ import fightingStyles.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 public class TournamentBranch {
     private TournamentBranch upperBranch;
@@ -35,12 +31,16 @@ public class TournamentBranch {
         }
     }
 
-    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level){
+    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level, MemoBranch memo){
         //TODO: terribly inefficient, basically recalculating the tree twice for each branch
         this.level = level;
 
+        if (memo == null){
+            memo = new MemoBranch(participants, level);
+        }
+
         if (participants.size() == 1){
-            //base case, only two participants one of them is undefined
+            //base case, only one participant left
             if (participants.getFirst().equals(Undefined.getInstance())){
                 this.participant = winningStyle;
             } else {
@@ -56,17 +56,18 @@ public class TournamentBranch {
             return;
         }
 
-        List<FightingStyle> upperWinners = possibleWinners(participants.subList(0, participants.size() / 2)).stream().filter(p -> p.fights(winningStyle).equals(winningStyle)).toList();
-        List<FightingStyle> lowerWinners = possibleWinners(participants.subList(participants.size() / 2, participants.size())).stream().filter(p -> p.fights(winningStyle).equals(winningStyle)).toList();
+        //find out if there is a random fighter -> must cover all possibilities -> negative case
+        //if there is an undefined fighter -> more freedom -> positive case, easier to calculate
+        //distinction between random and undefined being responsible for the winners available (custom node in tree?)
 
-        if (upperWinners.contains(winningStyle)){
-            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), winningStyle, level + 1);
-            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), lowerWinners.getFirst(), level + 1);
-        } else {
-            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), upperWinners.getFirst(), level + 1);
-            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), winningStyle, level + 1);
-        }
+        //neutralise randoms? -> random fighter is neutralised by paper, needs to happen by the semi-final
+        //neutralised is also indicated in possible winners (no Rock/Spock)
+        //if rock/spock is left -> other side needs to neutralise it (paper/lizard)
 
+        //easy cases: both sides neutralised -> no winningStyle beating element left -> choose winningStyle if possible, else random style
+
+        this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), memo.getUpperBranch().getPossibleParticipants().getFirst(), level + 1, memo.getUpperBranch());
+        this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), memo.getLowerBranch().getPossibleParticipants().getFirst(), level + 1, memo.getLowerBranch());
     }
 
     //Setter

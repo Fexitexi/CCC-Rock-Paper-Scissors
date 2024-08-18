@@ -16,20 +16,22 @@ public abstract class FightingStyle {
     abstract boolean beatsLizard();
     abstract boolean beatsSpock();
 
-    public static FightingStyle parseCharToFightingStyle(char c){
+    public static FightingStyle parseCharToFightingStyle(char c) {
         if (c == 'R') {
             return Rock.getInstance();
         } else if (c == 'S') {
             return Scissors.getInstance();
         } else if (c == 'P') {
             return Paper.getInstance();
-        }else if (c == 'L') {
+        } else if (c == 'L') {
             return Lizard.getInstance();
         } else if (c == 'Y') {
             return Spock.getInstance();
-        } else if (c == 'X'){
+        } else if (c == 'X') {
             return Undefined.getInstance();
-        } else {
+        } else if (c == 'Z'){
+            return RandomFighter.getInstance();
+        }else {
             throw new RuntimeException("Wrong Char Input!");
         }
     }

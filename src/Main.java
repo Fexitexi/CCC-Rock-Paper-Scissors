@@ -1,5 +1,4 @@
-import fightingStyles.FightingStyle;
-import fightingStyles.Scissors;
+import fightingStyles.*;
 import tournament.Tournament;
 
 import java.io.FileWriter;
@@ -50,7 +49,8 @@ public class Main {
             //result = solveLevel3(line, 2);
             //result = solveLevel4(line);
             //result = solveLevel5(line);
-            result = solveLevel6(line);
+            //result = solveLevel6(line);
+            result = solveLevel7(line);
 
             //write result to file
             writer.write(result + "\n");
@@ -159,7 +159,6 @@ public class Main {
 
         Tournament t = new Tournament(rocks, papers, scissors, spock, lizard, Scissors.getInstance());
         checkSolutionLevel5(rocks, papers, scissors, spock, lizard, t.getRoot().getStandingsAtLevel(t.getLevels()));
-        System.out.println("successful generation");
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
@@ -188,4 +187,40 @@ public class Main {
             throw new RuntimeException("Scissors should win");
         }
     }
+
+    private static String solveLevel7(String line){
+        Tournament t = new Tournament(line, Scissors.getInstance());
+        checkSolutionLevel7(t.getRoot().getStandingsAtLevel(t.getLevels()), line);
+
+        return t.getRoot().getStandingsAtLevel(t.getLevels());
+    }
+
+    private static void checkSolutionLevel7(String result, String line){
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) != 'X' && line.charAt(i) != result.charAt(i)) {
+                throw new RuntimeException("The given chars are not in the correct spots");
+            }
+        }
+        Tournament t = new Tournament(line);
+
+        int[] randoms = new int[(int) result.chars().filter(c -> c == 'Z').count()];
+
+        if (randoms.length != 0) {
+            randoms[0] = result.indexOf('Z');
+        }
+
+        for (int i = 1; i < randoms.length; i++) {
+            randoms[i] = result.indexOf('Z', randoms[i - 1] + 1);
+        }
+
+        for (int i : randoms) {
+
+            for (FightingStyle f : new FightingStyle[]{Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance()}) {
+
+            }
+        }
+
+        System.out.println(result);
+    }
+
 }
