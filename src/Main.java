@@ -3,12 +3,15 @@ import tournament.Tournament;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
     /**
      * Do not change this method. Method Loads the Config and initializes the IOManager.
+     *
      * @param args command line arguments
      */
     public static void main(String[] args) {
@@ -42,7 +45,7 @@ public class Main {
         reader.nextLine(); //skip linebreak
 
         String result;
-        for(int i = 0;i < n;i++) {
+        for (int i = 0; i < n; i++) {
             String line = reader.nextLine();
             //result = solveLevel1(line);
             //result = solveLevel2(line);
@@ -103,14 +106,14 @@ public class Main {
         return fightingStyles[0].fights(fightingStyles[1]).getChar() + "";
     }
 
-    public static String solveLevel2(String line){
+    public static String solveLevel2(String line) {
         //parse String into Tournament
         Tournament t = new Tournament(line);
 
         return t.getRoot().getStandingsAtLevel(t.getLevels() - 2);
     }
 
-    public static String solveLevel3(String line, int safeRound){
+    public static String solveLevel3(String line, int safeRound) {
         //parse String into amounts
         int rocks = Integer.parseInt(line.substring(0, line.indexOf('R')));
         int papers = Integer.parseInt(line.substring(line.indexOf('R') + 2, line.indexOf('P')));
@@ -122,7 +125,7 @@ public class Main {
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
-    private static void checkSolutionLevel3(int rocks, int papers, int scissors, String line, int safeRound){
+    private static void checkSolutionLevel3(int rocks, int papers, int scissors, String line, int safeRound) {
         checkOccurences(rocks, papers, scissors, 0, 0, line);
         //checking if the winner is scissors
         String resLine = new Tournament(line).getRoot().getStandingsAtLevel(safeRound);
@@ -141,7 +144,7 @@ public class Main {
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
-    private static void checkSolutionLevel4(int rocks, int papers, int scissors, String line){
+    private static void checkSolutionLevel4(int rocks, int papers, int scissors, String line) {
         checkOccurences(rocks, papers, scissors, 0, 0, line);
         //checking if the winner is scissors
         Tournament t = new Tournament(line);
@@ -162,7 +165,7 @@ public class Main {
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
-    private static void checkSolutionLevel5(int rocks, int papers, int scissors, int spocks, int lizard, String line){
+    private static void checkSolutionLevel5(int rocks, int papers, int scissors, int spocks, int lizard, String line) {
         checkOccurences(rocks, papers, scissors, spocks, lizard, line);
         Tournament t = new Tournament(line);
         if (t.getRoot().calcParticipant().getChar() != 'S') {
@@ -188,39 +191,52 @@ public class Main {
         }
     }
 
-    private static String solveLevel7(String line){
+    private static String solveLevel7(String line) {
         Tournament t = new Tournament(line, Scissors.getInstance());
         checkSolutionLevel7(t.getRoot().getStandingsAtLevel(t.getLevels()), line);
 
         return t.getRoot().getStandingsAtLevel(t.getLevels());
     }
 
-    private static void checkSolutionLevel7(String result, String line){
+    private static void checkSolutionLevel7(String result, String line) {
         for (int i = 0; i < line.length(); i++) {
             if (line.charAt(i) != 'X' && line.charAt(i) != result.charAt(i)) {
                 throw new RuntimeException("The given chars are not in the correct spots");
             }
         }
-        Tournament t = new Tournament(line);
 
-        int[] randoms = new int[(int) result.chars().filter(c -> c == 'Z').count()];
+        List<String> solutions = generateSolutions(result);
 
-        if (randoms.length != 0) {
-            randoms[0] = result.indexOf('Z');
-        }
-
-        for (int i = 1; i < randoms.length; i++) {
-            randoms[i] = result.indexOf('Z', randoms[i - 1] + 1);
-        }
-
-        for (int i : randoms) {
-
-            for (FightingStyle f : new FightingStyle[]{Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance()}) {
-
+        for (String s : solutions) {
+            System.out.println(s);
+            Tournament t = new Tournament(s);
+            if (!t.getRoot().calcParticipant().equals(Scissors.getInstance())) {
+                throw new RuntimeException("Scissors should win: " + s);
             }
         }
 
-        System.out.println(result);
+        //System.out.println(result);
+    }
+
+    private static ArrayList<String> generateSolutions(String result) {
+        int index = result.indexOf("Z");
+
+        if (index == -1) {
+            ArrayList<String> res = new ArrayList<>();
+            res.add(result);
+            return res;
+        }
+
+        result = result.replaceFirst("Z", "R");
+
+        ArrayList<String> solutions = generateSolutions(result);
+
+
+        for (FightingStyle f : new FightingStyle[]{Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance()}) {
+            solutions.addAll(solutions.stream().map(s -> s.substring(0, index) + f.getChar() + s.substring(index + 1)).toList());
+        }
+
+        return solutions.stream().distinct().collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
 }

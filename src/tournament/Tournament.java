@@ -36,10 +36,10 @@ public class Tournament {
         }
 
         //create tournament branches recursively
-        this.root = new TournamentBranch(this.participants, winningStyle,0, null);
+        this.root = new TournamentBranch(this.participants, winningStyle, 0, null);
     }
 
-    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound){
+    public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound) {
         //attributing winning, neutral and prohibited Style and amount
         FightingStyle prohibitedStyle;
         FightingStyle neutralStyle;
@@ -82,7 +82,7 @@ public class Tournament {
             amountMap.replace(neutralStyle, amountMap.get(neutralStyle) - 1);
         }
         //clear edge case (2 prohibited, 1 neutral)
-        if(amountMap.get(neutralStyle) >= 1){
+        if (amountMap.get(neutralStyle) >= 1) {
             participants.add(neutralStyle);
             amountMap.replace(neutralStyle, amountMap.get(neutralStyle) - 1);
             //if the edge case happens, in order to be a valid input, there must be at least 5 winning type remaining
@@ -169,11 +169,6 @@ public class Tournament {
                 participants = buildWinner(participants, Rock.getInstance());
             }
             case Scissors scissor -> {
-                System.out.println("Initital: ");
-                for (FightingStyle fightingStyle : participants) {
-                    System.out.print(fightingStyle.getChar());
-                }
-                System.out.println();
                 participants = buildWinner(participants, Scissors.getInstance());
             }
             case Spock spock -> {
@@ -192,11 +187,11 @@ public class Tournament {
         this.root = new TournamentBranch(this.participants, 0);
     }
 
-    public TournamentBranch getRoot(){
+    public TournamentBranch getRoot() {
         return this.root;
     }
 
-    public int getLevels(){
+    public int getLevels() {
         return this.levels;
     }
 
@@ -229,7 +224,7 @@ public class Tournament {
             if (participants.stream().anyMatch(f -> f.equals(leftWinner.getsDoubleBeatenBy()))) {
                 //if there is at least one which can beat winning style, then ensure validity by adding enough intermediate neutralizers
                 for (int i = 0; i < Math.log(participants.size() / 2.0) / Math.log(2); i++) {
-                    if(participants.remove(leftWinner.getDoubleBeats())) {
+                    if (participants.remove(leftWinner.getDoubleBeats())) {
                         lList.add(leftWinner.getDoubleBeats());
                     } else {
                         //if there are less intermediate neutralizers, there also have to be less winningStyle beaters

@@ -11,9 +11,10 @@ public class TournamentBranch {
     private TournamentBranch lowerBranch;
     private int level;
     private FightingStyle participant;
+    private List<FightingStyle> possibleParticipants;
 
     //Constructor
-    private TournamentBranch(){
+    private TournamentBranch() {
     }
 
     public TournamentBranch(List<FightingStyle> participants, int level) {
@@ -31,43 +32,45 @@ public class TournamentBranch {
         }
     }
 
-    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level, MemoBranch memo){
+    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level, MemoBranch memo) {
         //TODO: terribly inefficient, basically recalculating the tree twice for each branch
         this.level = level;
 
-        if (memo == null){
-            memo = new MemoBranch(participants, level);
-        }
-
-        if (participants.size() == 1){
+        if (participants.size() == 1) {
             //base case, only one participant left
-            if (participants.getFirst().equals(Undefined.getInstance())){
+            if (participants.getFirst().equals(Undefined.getInstance())) {
                 this.participant = winningStyle;
             } else {
                 this.participant = participants.getFirst();
             }
             return;
         }
+        List<FightingStyle> upperParticipants = participants.subList(0, participants.size() / 2);
+        List<FightingStyle> lowerParticipants = participants.subList(participants.size() / 2, participants.size());
 
-        if (participants.stream().noneMatch(p -> p.equals(Undefined.getInstance()))){
+
+        if (!upperParticipants.contains(Undefined.getInstance())) {
             //base case, all participants are defined
-            this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2),level + 1);
-            this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()),level + 1);
-            return;
+            this.upperBranch = new TournamentBranch(upperParticipants, level + 1);
+            if (this.upperBranch.calcPossibleParticipants().stream().allMatch(p -> p.fights(winningStyle).equals(winningStyle))) {
+                //winningstyle does not get beaten, therefore possible winning branch
+                this.lowerBranch = new TournamentBranch(lowerParticipants, winningStyle, level + 1, null);
+            } else {
+                this.lowerBranch = new TournamentBranch(lowerParticipants, Paper.getInstance(), level + 1, null);
+            }
+        } else if (!lowerParticipants.contains(Undefined.getInstance())) {
+            this.lowerBranch = new TournamentBranch(lowerParticipants, level + 1);
+            if (this.lowerBranch.calcPossibleParticipants().stream().allMatch(p -> p.fights(winningStyle).equals(winningStyle))) {
+                //winningstyle does not get beaten, therefore possible winning branch
+                this.upperBranch = new TournamentBranch(upperParticipants, winningStyle, level + 1, null);
+            } else {
+                this.upperBranch = new TournamentBranch(upperParticipants, Paper.getInstance(), level + 1, null);
+            }
+        } else {
+            //neither branch without undefined, propagate further
+            this.upperBranch = new TournamentBranch(upperParticipants, winningStyle, level + 1, null);
+            this.lowerBranch = new TournamentBranch(lowerParticipants, winningStyle, level + 1, null);
         }
-
-        //find out if there is a random fighter -> must cover all possibilities -> negative case
-        //if there is an undefined fighter -> more freedom -> positive case, easier to calculate
-        //distinction between random and undefined being responsible for the winners available (custom node in tree?)
-
-        //neutralise randoms? -> random fighter is neutralised by paper, needs to happen by the semi-final
-        //neutralised is also indicated in possible winners (no Rock/Spock)
-        //if rock/spock is left -> other side needs to neutralise it (paper/lizard)
-
-        //easy cases: both sides neutralised -> no winningStyle beating element left -> choose winningStyle if possible, else random style
-
-        this.upperBranch = new TournamentBranch(participants.subList(0, participants.size() / 2), memo.getUpperBranch().getPossibleParticipants().getFirst(), level + 1, memo.getUpperBranch());
-        this.lowerBranch = new TournamentBranch(participants.subList(participants.size() / 2, participants.size()), memo.getLowerBranch().getPossibleParticipants().getFirst(), level + 1, memo.getLowerBranch());
     }
 
     //Setter
@@ -115,15 +118,15 @@ public class TournamentBranch {
 
     public String getStandingsAtLevel(int level) {
         if (this.level == level) {
-            return this.calcParticipant().getChar() + "";
+            return this.participant.getChar() + "";
         }
 
         return this.upperBranch.getStandingsAtLevel(level) + this.lowerBranch.getStandingsAtLevel(level);
     }
 
-    private static List<FightingStyle> possibleWinners(List<FightingStyle> participants){
-        if (participants.size() == 1){
-            if (participants.getFirst().equals(Undefined.getInstance())){
+    private static List<FightingStyle> possibleWinners(List<FightingStyle> participants) {
+        if (participants.size() == 1) {
+            if (participants.getFirst().equals(Undefined.getInstance())) {
                 return Arrays.asList(Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance());
             }
             return participants;
@@ -142,7 +145,29 @@ public class TournamentBranch {
         return winners.stream().distinct().toList();
     }
 
-    public static class TournamentBranchBuilder{
+    private List<FightingStyle> calcPossibleParticipants(){
+        if (this.upperBranch == null) {
+            //leaf
+            if (this.participant.equals(RandomFighter.getInstance())) {
+                return Arrays.asList(Rock.getInstance(), Paper.getInstance(), Scissors.getInstance(), Lizard.getInstance(), Spock.getInstance());
+            } else if (this.participant.equals(Undefined.getInstance())) {
+                return new ArrayList<>();
+            } else {
+                return List.of(this.participant);
+            }
+        }
+        ArrayList<FightingStyle> winners = new ArrayList<>();
+
+        for (FightingStyle f : this.upperBranch.calcPossibleParticipants()) {
+            for (FightingStyle g : this.lowerBranch.calcPossibleParticipants()) {
+                winners.add(f.fights(g));
+            }
+        }
+
+        return winners.stream().distinct().toList();
+    }
+
+    public static class TournamentBranchBuilder {
         private TournamentBranch upperBranch;
         private TournamentBranch lowerBranch;
         private int level;
@@ -152,28 +177,28 @@ public class TournamentBranch {
             return new TournamentBranchBuilder();
         }
 
-        public TournamentBranchBuilder withUpperBranch(TournamentBranch upperBranch){
+        public TournamentBranchBuilder withUpperBranch(TournamentBranch upperBranch) {
             this.upperBranch = upperBranch;
             return this;
         }
 
-        public TournamentBranchBuilder withLowerBranch(TournamentBranch lowerBranch){
+        public TournamentBranchBuilder withLowerBranch(TournamentBranch lowerBranch) {
             this.lowerBranch = lowerBranch;
             return this;
         }
 
-        public TournamentBranchBuilder withLevel(int level){
+        public TournamentBranchBuilder withLevel(int level) {
             this.level = level;
             return this;
         }
 
-        public TournamentBranchBuilder withParticipant(FightingStyle participant){
+        public TournamentBranchBuilder withParticipant(FightingStyle participant) {
             this.participant = participant;
             return this;
         }
 
-        public TournamentBranch build(){
-            TournamentBranch branch =  new TournamentBranch();
+        public TournamentBranch build() {
+            TournamentBranch branch = new TournamentBranch();
             branch.setUpperBranch(this.upperBranch);
             branch.setLowerBranch(this.lowerBranch);
             branch.setLevel(this.level);
