@@ -32,7 +32,7 @@ public class TournamentBranch {
         }
     }
 
-    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level, MemoBranch memo) {
+    public TournamentBranch(List<FightingStyle> participants, FightingStyle winningStyle, int level) {
         //TODO: terribly inefficient, basically recalculating the tree twice for each branch
         this.level = level;
 
@@ -48,29 +48,27 @@ public class TournamentBranch {
         List<FightingStyle> upperParticipants = participants.subList(0, participants.size() / 2);
         List<FightingStyle> lowerParticipants = participants.subList(participants.size() / 2, participants.size());
 
+        //base cases, one (or both) do not contain undefined
 
-        if (!upperParticipants.contains(Undefined.getInstance())) {
-            //base case, all participants are defined
+        if (upperParticipants.stream().noneMatch(f -> f.equals(Undefined.getInstance()))){
             this.upperBranch = new TournamentBranch(upperParticipants, level + 1);
-            if (this.upperBranch.calcPossibleParticipants().stream().allMatch(p -> p.fights(winningStyle).equals(winningStyle))) {
-                //winningstyle does not get beaten, therefore possible winning branch
-                this.lowerBranch = new TournamentBranch(lowerParticipants, winningStyle, level + 1, null);
-            } else {
-                this.lowerBranch = new TournamentBranch(lowerParticipants, Paper.getInstance(), level + 1, null);
-            }
-        } else if (!lowerParticipants.contains(Undefined.getInstance())) {
-            this.lowerBranch = new TournamentBranch(lowerParticipants, level + 1);
-            if (this.lowerBranch.calcPossibleParticipants().stream().allMatch(p -> p.fights(winningStyle).equals(winningStyle))) {
-                //winningstyle does not get beaten, therefore possible winning branch
-                this.upperBranch = new TournamentBranch(upperParticipants, winningStyle, level + 1, null);
-            } else {
-                this.upperBranch = new TournamentBranch(upperParticipants, Paper.getInstance(), level + 1, null);
-            }
-        } else {
-            //neither branch without undefined, propagate further
-            this.upperBranch = new TournamentBranch(upperParticipants, winningStyle, level + 1, null);
-            this.lowerBranch = new TournamentBranch(lowerParticipants, winningStyle, level + 1, null);
+            this.possibleParticipants = this.upperBranch.calcPossibleParticipants();
         }
+
+        if (lowerParticipants.stream().noneMatch(f -> f.equals(Undefined.getInstance()))){
+            this.lowerBranch = new TournamentBranch(lowerParticipants, level + 1);
+            this.possibleParticipants = this.lowerBranch.calcPossibleParticipants().stream().flatMap(f -> this.possibleParticipants.stream().map(f::fights)).distinct().toList();
+            //TODO: verify correctness
+        }
+
+        if (this.upperBranch != null && this.lowerBranch != null){
+            return;
+        }
+
+        //TODO: for the branches with undefined, loop through the possible winning styles and check if they are possible (not null)
+        //TODO: add verification if the participant is indeed the winningstyle, return null if not
+
+
     }
 
     //Setter

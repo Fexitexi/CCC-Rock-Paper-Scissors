@@ -36,7 +36,7 @@ public class Tournament {
         }
 
         //create tournament branches recursively
-        this.root = new TournamentBranch(this.participants, winningStyle, 0, null);
+        this.root = new TournamentBranch(this.participants, winningStyle, 0);
     }
 
     public Tournament(int rocks, int papers, int scissors, FightingStyle winningStyle, int safeRound) {
